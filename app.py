@@ -49,13 +49,17 @@ sample_df = pd.DataFrame([
     {"खात्याचे नाव": "स्टेशनरी व छपाई खर्च", "Type": "Expense", "Debit": 10000, "Credit": 0},
 ])
 
-st.download_button(
-    label="📥 नमुना एक्सेल टेम्पलेट डाऊनलोड करा",
-    data=io.BytesIO(sample_df.to_csv(index=False).encode('utf-8')),
-    file_name="sample_trial_balance.csv",
-    mime="text/csv"
-)
+# Excel (.xlsx) फॉरमॅटमध्ये सॅम्पल तयार करणे
+buffer = io.BytesIO()
+with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+    sample_df.to_excel(writer, index=False, sheet_name='Trial_Balance')
 
+st.download_button(
+    label="📥 नमुना एक्सेल टेम्पलेट डाऊनलोड करा (.xlsx)",
+    data=buffer.getvalue(),
+    file_name="sample_trial_balance.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 st.markdown("---")
 
 # ३. फॉर्म 'ओ' (दोष दुरुस्ती) टेबल
