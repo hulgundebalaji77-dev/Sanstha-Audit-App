@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
+  
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+  body {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 11px;
+    color: #111;
+  }
+  .header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .header h2 { margin: 2px 0; font-size: 16px; text-transform: uppercase; }
+  .header p { margin: 2px 0; font-size: 11px; }
+
+  .section-title {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #f2f2f2;
+    padding: 4px;
+    border: 1px solid #333;
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0px;
+  }
+  th, td {
+    border: 1px solid #333;
+    padding: 5px 6px;
+    vertical-align: top;
+  }
+  th {
+    background-color: #f7f7f7;
+    font-weight: bold;
+    text-align: center;
+  }
+  .amount {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .total-row {
+    font-weight: bold;
+    background-color: #f0f0f0;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+  .sign-container {
+    margin-top: 40px;
+    width: 100%;
+  }
+  .sign-box {
+    float: left;
+    text-align: center;
+  }
+  .box-info {
+    border: 1.5px solid #222;
+    padding: 10px;
+    margin-top: 15px;
+    background: #fafafa;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- पान १: नफा-तोटा पत्रक -->
+<div class="header">
+  <h2>{{ sanstha_name }}</h2>
+  <p>{{ address }} | नोंदणी क्र.: {{ reg_no }}</p>
+  <p><strong>आर्थिक वर्ष: {{ fin_year }}</strong></p>
+</div>
+
+<div class="section-title">नफा-तोटा पत्रक (Income & Expenditure Account) - ३१ मार्च अखेर</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 35%;">खर्च (Expenditure)</th>
+      <th style="width: 15%;">रक्कम (₹)</th>
+      <th style="width: 35%;">उत्पन्न (Income)</th>
+      <th style="width: 15%;">रक्कम (₹)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        {% for exp in expenses %}
+          <div>{{ exp['खात्याचे नाव'] }}</div>
+        {% endfor %}
+        {% if net_profit > 0 %}
+          <div style="font-weight:bold; margin-top:6px;">निव्वळ नफा (Net Profit)</div>
+        {% endif %}
+      </td>
+      <td class="amount">
+        {% for exp in expenses %}
+          <div>{{ "{:,.2f}".format(exp['Final']) }}</div>
+        {% endfor %}
+        {% if net_profit > 0 %}
+          <div style="font-weight:bold; margin-top:6px;">{{ "{:,.2f}".format(net_profit) }}</div>
+        {% endif %}
+      </td>
+      <td>
+        {% for inc in incomes %}
+          <div>{{ inc['खात्याचे नाव'] }}</div>
+        {% endfor %}
+        {% if net_profit < 0 %}
+          <div style="font-weight:bold; margin-top:6px;">निव्वळ तोटा (Net Loss)</div>
+        {% endif %}
+      </td>
+      <td class="amount">
+        {% for inc in incomes %}
+          <div>{{ "{:,.2f}".format(inc['Final']) }}</div>
+        {% endfor %}
+        {% if net_profit < 0 %}
+          <div style="font-weight:bold; margin-top:6px;">{{ "{:,.2f}".format(net_profit|abs) }}</div>
+        {% endif %}
+      </td>
+    </tr>
+    <tr class="total-row">
+      <td>एकूण</td>
+      <td class="amount">{{ "{:,.2f}".format(total_income if net_profit > 0 else total_expense) }}</td>
+      <td>एकूण</td>
+      <td class="amount">{{ "{:,.2f}".format(total_income if net_profit > 0 else total_expense) }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="sign-container">
+  <div class="sign-box" style="width: 50%;">
+    <br><br>__________<br>
+    <strong>व्यवस्थापक / अध्यक्ष</strong><br>
+    {{ sanstha_name }}
+  </div>
+  <div class="sign-box" style="width: 50%;">
+    <br><br>__________<br>
+    <strong>वैधानिक लेखापरीक्षक</strong><br>
+    सनदी लेखापाल / पॅनेल ऑडिटर
+  </div>
+  <div style="clear: both;"></div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- पान २: ताळेबंद (Balance Sheet) -->
+<div class="header">
+  <h2>{{ sanstha_name }}</h2>
+  <p>{{ address }} | नोंदणी क्र.: {{ reg_no }}</p>
+  <p><strong>आर्थिक वर्ष: {{ fin_year }}</strong></p>
+</div>
+
+<div class="section-title">ताळेबंद पत्रक (Balance Sheet) - ३१ मार्च अखेर</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 35%;">देयता / दायित्व (Liabilities)</th>
+      <th style="width: 15%;">रक्कम (₹)</th>
+      <th style="width: 35%;">मालमत्ता / जिंदगी (Assets)</th>
+      <th style="width: 15%;">रक्कम (₹)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        {% for liab in liabilities %}
+          <div>{{ liab['खात्याचे नाव'] }}</div>
+        {% endfor %}
+      </td>
+      <td class="amount">
+        {% for liab in liabilities %}
+          <div>{{ "{:,.2f}".format(liab['Final']) }}</div>
+        {% endfor %}
+      </td>
+      <td>
+        {% for asset in assets %}
+          <div>{{ asset['खात्याचे नाव'] }}</div>
+        {% endfor %}
+      </td>
+      <td class="amount">
+        {% for asset in assets %}
+          <div>{{ "{:,.2f}".format(asset['Final']) }}</div>
+        {% endfor %}
+      </td>
+    </tr>
+    <tr class="total-row">
+      <td>एकूण देयता</td>
+      <td class="amount">{{ "{:,.2f}".format(total_liability) }}</td>
+      <td>एकूण मालमत्ता</td>
+      <td class="amount">{{ "{:,.2f}".format(total_assets) }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="sign-container">
+  <div class="sign-box" style="width: 50%;">
+    <br><br>__________<br>
+    <strong>व्यवस्थापक / अध्यक्ष</strong><br>
+    {{ sanstha_name }}
+  </div>
+  <div class="sign-box" style="width: 50%;">
+    <br><br>__________<br>
+    <strong>वैधानिक लेखापरीक्षक</strong><br>
+    सनदी लेखापाल / पॅनेल ऑडिटर
+  </div>
+  <div style="clear: both;"></div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- पान ३: फॉर्म 'न' (Form 'N') -->
+<div class="header">
+  <h2>{{ sanstha_name }}</h2>
+  <p>{{ address }} | नोंदणी क्र.: {{ reg_no }}</p>
+  <h3 style="margin: 8px 0 2px 0; text-decoration: underline;">नमुना 'न' (FORM 'N')</h3>
+  <p><strong>[महाराष्ट्र सहकारी संस्था नियम, १९६१ चे नियम ६९ (४) पहा]</strong></p>
+  <p><strong>लेखापरीक्षण वर्ग निश्चिती व मूल्यमापन पत्रक (सन {{ fin_year }})</strong></p>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 8%;">अ.क्र.</th>
+      <th style="width: 56%; text-align: left;">मूल्यमापनाचे मुख्य घटक (Evaluation Criteria)</th>
+      <th style="width: 18%;">कमाल गुण (Max)</th>
+      <th style="width: 18%;">प्राप्त गुण (Obtained)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">१</td>
+      <td><strong>भांडवली व आर्थिक स्थिती:</strong> भागभांडवल, निधी व ठेवींची स्थिती.</td>
+      <td style="text-align: center;">२५</td>
+      <td style="text-align: center;">{{ m_financial }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">२</td>
+      <td><strong>व्यवसाय व वसुली:</strong> कर्ज वाटप, गुंतवणूक व वसुलीचे प्रमाण.</td>
+      <td style="text-align: center;">२५</td>
+      <td style="text-align: center;">{{ m_loan }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">३</td>
+      <td><strong>व्यवस्थापन व नियम पालन:</strong> सभा, उपविधी व वैधानिक बाबींची पूर्तता.</td>
+      <td style="text-align: center;">२५</td>
+      <td style="text-align: center;">{{ m_mgmt }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">४</td>
+      <td><strong>हिशोब पद्धती व अंतर्गत तपासणी:</strong> वह्या, व्हाउचर्स व बँक मेळ अद्ययावत असणे.</td>
+      <td style="text-align: center;">२५</td>
+      <td style="text-align: center;">{{ m_accounts }}</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="2" style="text-align: right;">एकूण गुण:</td>
+      <td style="text-align: center;">१००</td>
+      <td style="text-align: center;">{{ total_marks }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box-info">
+  <div><strong>१. संस्थेस देण्यात आलेला ऑडिट वर्ग:</strong> <span style="font-size: 14px; font-weight: bold; text-decoration: underline;">वर्ग {{ audit_class }}</span></div>
+  <div><strong>२. वर्गवारी प्रमाण:</strong> 'अ' वर्ग (७० व त्यापेक्षा जास्त) | 'ब' वर्ग (५५ ते ६९) | 'क' वर्ग (४० ते ५४) | 'ड' वर्ग (४० पेक्षा कमी)</div>
+  <div><strong>३. लेखापरीक्षकाचा अभिप्राय:</strong> संस्थेची हिशोब पुस्तके तपासण्यात आली असून कामकाजाची स्थिती समाधानकारक आढळली.</div>
+</div>
+
+<div class="sign-container">
+  <div class="sign-box" style="width: 50%; text-align: left;">
+    दिनांक: {{ audit_date }}<br>
+    स्थळ: {{ address.split(',')[0] }}
+  </div>
+  <div class="sign-box" style="width: 50%;">
+    <br><br>__________<br>
+    <strong>{{ auditor_name }}</strong><br>
+    वैधानिक लेखापरीक्षक
+  </div>
+  <div style="clear: both;"></div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- पान ४: फॉर्म 'ओ' (Form 'O') -->
+<div class="header">
+  <h2>{{ sanstha_name }}</h2>
+  <p>{{ address }} | नोंदणी क्र.: {{ reg_no }}</p>
+  <h3 style="margin: 8px 0 2px 0; text-decoration: underline;">नमुना 'ओ' (FORM 'O')</h3>
+  <p><strong>[महाराष्ट्र सहकारी संस्था नियम, १९६१ चे नियम ७३ पहा]</strong></p>
+  <p><strong>लेखापरीक्षण अहवालातील दोषांचा दुरुस्ती अहवाल (सन {{ fin_year }})</strong></p>
+</div>
+
+<div style="margin-bottom: 8px;">
+  <strong>संचालक मंडळ सभा दिनांक:</strong> {{ meeting_date }} &nbsp;|&nbsp; 
+  <strong>मंजूर ठराव क्रमांक:</strong> {{ resolution_no }}
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 7%;">अ.क्र.</th>
+      <th style="width: 13%;">परिच्छेद क्र.</th>
+      <th style="width: 32%;">लेखापरीक्षकाचे आक्षेप व दोष</th>
+      <th style="width: 33%;">संस्थेने केलेली दुरुस्ती व खुलासा</th>
+      <th style="width: 15%;">अंतिम शेरा</th>
+    </tr>
+    <tr style="font-size: 9px; background-color: #eee;">
+      <th>१</th><th>२</th><th>३</th><th>४</th><th>५</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rectifications %}
+    <tr>
+      <td style="text-align: center;">{{ loop.index }}</td>
+      <td style="text-align: center;">{{ row['ऑडिट परिच्छेद क्र.'] }}</td>
+      <td>{{ row['लेखापरीक्षणातील आक्षेप / दोष'] }}</td>
+      <td>
+        {{ row['संस्थेने केलेली दुरुस्ती / खुलासा'] }}
+        {% if row['दुरुस्तीचा दिनांक'] %}
+          <div style="font-size: 9px; color: #555; margin-top: 3px;">(दुरुस्ती: {{ row['दुरुस्तीचा दिनांक'] }})</div>
+        {% endif %}
+      </td>
+      <td style="text-align: center;">{{ row['पुनरावलोकन शेरा'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p style="margin-top: 15px; font-size: 10.5px;">
+  <strong>प्रमाणपत्र:</strong> प्रमाणित करण्यात येते की, सन {{ fin_year }} च्या वैधानिक लेखापरीक्षण अहवालातील दोषांची संचालक मंडळाच्या बैठकीत दुरुस्ती मंजूर करण्यात आली आहे.
+</p>
+
+<div class="sign-container">
+  <div class="sign-box" style="width: 33%;">
+    <br><br>________<br>
+    <strong>व्यवस्थापक / सचिव</strong>
+  </div>
+  <div class="sign-box" style="width: 33%;">
+    <br><br>________<br>
+    <strong>अध्यक्ष</strong>
+  </div>
+  <div class="sign-box" style="width: 34%;">
+    <br><br>________<br>
+    <strong>वैधानिक लेखापरीक्षक</strong>
+  </div>
+  <div style="clear: both;"></div>
+</div>
+
+</body>
+</html>
